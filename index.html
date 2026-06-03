@@ -787,6 +787,9 @@ footer {
   .hero-btns { flex-direction:column; }
   .c-links { flex-direction:column;align-items:center; }
 }
+.thumb-video { width:100%;height:100%;object-fit:cover;display:block; }
+.modal-vid video { width:100%;height:100%;object-fit:cover;display:block;background:#000; }
+
 </style>
 </head>
 <body>
@@ -926,19 +929,19 @@ footer {
   <div id="pane-brand" class="tab-pane on">
     <div class="vgrid vgrid-3">
       <div class="vcard reveal up stagger-1" onclick="openModal('brand1')">
-        <div class="vthumb"><div class="vthumb-inner g-brand">
-          <div class="thumb-orb o-em" style="animation-delay:0s"></div>
-          <div class="scan-lines"></div>
+        <div class="vthumb" style="position:relative">
+          <video class="thumb-video"
+            src="https://raw.githubusercontent.com/olijar2701/ai-video-portfolio/main/videos/hoka.mov"
+            muted loop playsinline preload="metadata"></video>
           <div class="play-layer"><div class="play-ring"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4 2L11 6.5L4 11V2Z" fill="#F7F3EC"/></svg></div></div>
-        </div>
-          <div class="ai-pill">Higgsfield</div>
-          <div class="status-pill st-wip">In production</div>
-          <div class="dur-badge">0:08</div>
+          <div class="ai-pill">Real footage</div>
+          <div class="status-pill st-live">Live</div>
+          <div class="dur-badge">0:28</div>
         </div>
         <div class="vinfo">
-          <div class="vtitle">Perfume Campaign — Golden Hour</div>
-          <div class="vmeta"><span>Brand film</span><span class="vdot"></span><span>Soul Engine</span><span class="vdot"></span><span>16:9</span></div>
-          <div class="vtags"><span class="vtag">Fashion</span><span class="vtag">Beauty</span><span class="vtag">Slow-mo</span></div>
+          <div class="vtitle">Hoka — Runner in Motion</div>
+          <div class="vmeta"><span>Brand film</span><span class="vdot"></span><span>Higgsfield</span><span class="vdot"></span><span>16:9</span></div>
+          <div class="vtags"><span class="vtag">Running</span><span class="vtag">Sport</span><span class="vtag">Cinematic</span></div>
         </div>
       </div>
       <div class="vcard reveal up stagger-2" onclick="openModal('brand2')">
@@ -1257,7 +1260,7 @@ footer {
 <div class="modal-bg" id="modal" onclick="closeBg(event)">
   <div class="modal-box">
     <button class="modal-close" onclick="closeModal()">&#x2715;</button>
-    <div class="modal-vid"><span id="m-placeholder">Video coming soon — in production</span></div>
+    <div class="modal-vid" id="modal-vid-inner"><span style="font-family:var(--serif);font-style:italic;color:rgba(28,43,69,0.35);font-size:17px">Video in production — check back soon</span></div>
     <div class="modal-body">
       <div class="modal-title" id="m-title"></div>
       <div class="modal-desc" id="m-desc"></div>
@@ -1321,7 +1324,7 @@ function tab(id) {
 // ── MODAL ──────────────────────────────────────────────────
 const MD = {
   showreel: { t:'2026 AI Video Showreel', d:'A 60-second reel showcasing the full range — brand films, product ads, UGC content, cinematic storytelling, and motion VFX. All generated with Higgsfield Soul Engine and SoulID.' },
-  brand1: { t:'Perfume Campaign — Golden Hour', d:'Slow-motion cinematic brand film for a luxury fragrance. Warm golden-hour light, subtle lens flare, product close-up. Higgsfield Soul Engine, 16:9.' },
+  brand1: { t:'Hoka — Runner in Motion', d:'Cinematic brand film featuring a runner and the Hoka shoe in motion. Documentary-style handheld cinematography, slow-motion sole impact, authentic athletic energy.', videoUrl:'https://raw.githubusercontent.com/olijar2701/ai-video-portfolio/main/videos/hoka.mov' },
   brand2: { t:'Fashion Film — Warsaw Streets', d:'SoulID-locked character walking through cobblestone streets. Trench coat, autumn palette, cinematic dolly push. Demonstrates character consistency across multiple shots.' },
   brand3: { t:'Skincare Product — Micro Glow', d:'Ultra close-up skin visualization with diffused light. Serum dissolving into a radiant glow. Minimalist white studio aesthetic for high-end beauty brands.' },
   product1: { t:'Sneaker 360 — Studio Reveal', d:'Product floating mid-air, 360-degree rotation with dramatic studio shadows. Clean studio background. High-converting ecommerce format for Meta and TikTok ads.' },
@@ -1342,8 +1345,12 @@ function openModal(id) {
   const d = MD[id] || { t:'Project', d:'Coming soon.' };
   document.getElementById('m-title').textContent = d.t;
   document.getElementById('m-desc').textContent = d.d;
-  document.getElementById('m-placeholder').textContent =
-    id === 'showreel' ? 'Add your YouTube embed here' : 'Video in production — check back soon';
+  const area = document.getElementById('modal-vid-inner');
+  if (d.videoUrl) {
+    area.innerHTML = '<video src="' + d.videoUrl + '" controls autoplay muted playsinline style="width:100%;height:100%;object-fit:cover;background:#000"></video>';
+  } else {
+    area.innerHTML = '<span style="font-family:var(--serif);font-style:italic;color:rgba(28,43,69,0.35);font-size:17px">Video in production — check back soon</span>';
+  }
   document.getElementById('modal').classList.add('on');
   document.body.style.overflow = 'hidden';
 }
@@ -1386,6 +1393,15 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal()
       .forEach(el => el.style.transform = '');
   });
 })();
+
+// ── VIDEO CARD HOVER PLAY ─────────────────────────────────
+document.querySelectorAll('.vcard').forEach(card => {
+  const vid = card.querySelector('.thumb-video');
+  if (!vid) return;
+  card.addEventListener('mouseenter', () => vid.play());
+  card.addEventListener('mouseleave', () => { vid.pause(); vid.currentTime = 0; });
+});
+
 </script>
 </body>
 </html>
