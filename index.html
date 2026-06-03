@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oliwia Jarząbek — AI Video Creator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter+Tight:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ivory:       #F7F3EC;
+  --ivory-deep:  #EDE8DF;
+  --cream:       #FEFCF8;
+  --beige:       #E8E1D5;
+  --emerald:     #1C2B45;
+  --emerald-mid: #2E4163;
+  --emerald-soft:#D0D8E8;
+  --emerald-mist:#E8EDF5;
+  --navy:        #1C2B45;
+  --navy-mid:    #2E4163;
+  --navy-soft:   #D0D8E8;
+  --ink:         #1C2B45;
+  --ink-dim:     #4A5C72;
+  --ink-faint:   #8A9BB0;
+  --border:      rgba(28,43,69,0.08);
+  --border-mid:  rgba(28,43,69,0.14);
+  --serif: 'Cormorant Garamond', Georgia, serif;
+  --sans:  'Inter Tight', system-ui, sans-serif;
+  --r:     10px;
+  --rl:    18px;
+  --rxl:   28px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--ivory);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── SCROLL ANIMATIONS ─────────────────────────────── */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.75s cubic-bezier(.22,1,.36,1),
+              transform 0.75s cubic-bezier(.22,1,.36,1);
+}
+.reveal.up    { transform: translateY(32px); }
+.reveal.left  { transform: translateX(-32px); }
+.reveal.right { transform: translateX(32px); }
+.reveal.scale { transform: scale(0.94); }
+.reveal.vis   { opacity:1; transform: none; }
+
+.stagger-1 { transition-delay: 0.05s; }
+.stagger-2 { transition-delay: 0.13s; }
+.stagger-3 { transition-delay: 0.21s; }
+.stagger-4 { transition-delay: 0.29s; }
+.stagger-5 { transition-delay: 0.37s; }
+
+/* ── NAV ───────────────────────────────────────────── */
+nav {
+  position: fixed; top:0; left:0; right:0; z-index:100;
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 0 48px; height: 62px;
+  background: rgba(247,243,236,0.88);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--border);
+  transition: box-shadow 0.3s;
+}
+nav.scrolled { box-shadow: 0 2px 20px rgba(28,43,69,0.07); }
+
+.nav-logo {
+  font-family: var(--serif); font-size:17px; font-weight:400;
+  color: var(--ink); text-decoration:none; letter-spacing:0.01em;
+}
+.nav-logo em { font-style:italic; color: var(--emerald); }
+
+.nav-links { display:flex; gap:28px; list-style:none; }
+.nav-links a {
+  color: var(--ink-dim); text-decoration:none;
+  font-size:12px; font-weight:500; letter-spacing:0.08em;
+  text-transform:uppercase; transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--ink); }
+
+.nav-cta {
+  background: var(--emerald) !important;
+  color: var(--cream) !important;
+  padding: 8px 20px; border-radius: var(--r);
+  font-size:12px !important; font-weight:600 !important;
+  transition: background 0.2s !important;
+}
+.nav-cta:hover { background: var(--navy) !important; }
+
+/* ── HERO ──────────────────────────────────────────── */
+#hero {
+  min-height: 100vh;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  text-align:center; padding:140px 40px 100px;
+  position:relative; overflow:hidden;
+}
+
+/* ── Ghost text ── */
+.hero-ghost {
+  position:absolute; inset:0; pointer-events:none;
+  display:flex; align-items:center; justify-content:center;
+  z-index:0; overflow:hidden;
+}
+.ghost-word {
+  font-family: var(--serif);
+  font-size: clamp(180px, 26vw, 360px);
+  font-weight:300; font-style:italic;
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(28,43,69,0.07);
+  letter-spacing:-0.04em; line-height:1;
+  user-select:none; white-space:nowrap;
+  will-change:transform;
+  transition: transform 0.08s linear;
+}
+
+/* ── Concentric rings ── */
+.hero-rings {
+  position:absolute; inset:0; pointer-events:none; z-index:0;
+  display:flex; align-items:center; justify-content:center;
+}
+.ring {
+  position:absolute; border-radius:50%;
+  border: 1px solid rgba(28,43,69,0.07);
+  will-change:transform; transition: transform 0.08s linear;
+}
+.ring-1 { width:700px; height:700px; animation: ringBreath 10s ease-in-out infinite; }
+.ring-2 { width:500px; height:500px; animation: ringBreath 10s ease-in-out infinite 1.2s; border-color:rgba(28,43,69,0.09); }
+.ring-3 { width:320px; height:320px; animation: ringBreath 10s ease-in-out infinite 2.4s; border-color:rgba(28,43,69,0.11); }
+.ring-4 { width:160px; height:160px; animation: ringBreath 10s ease-in-out infinite 3.6s; border-color:rgba(28,43,69,0.08); }
+@keyframes ringBreath {
+  0%,100% { transform:scale(1); opacity:1; }
+  50% { transform:scale(1.03); opacity:0.65; }
+}
+
+/* ── Floating marks ── */
+.hero-marks { position:absolute; inset:0; pointer-events:none; z-index:0; }
+.mark {
+  position:absolute; width:12px; height:12px;
+  will-change:transform; transition: transform 0.12s linear;
+}
+.mark::before, .mark::after {
+  content:''; position:absolute; background:rgba(28,43,69,0.15); border-radius:1px;
+}
+.mark::before { width:100%; height:1.5px; top:50%; left:0; transform:translateY(-50%); }
+.mark::after  { width:1.5px; height:100%; left:50%; top:0; transform:translateX(-50%); }
+
+/* ── Corner brackets ── */
+.corner {
+  position:absolute; width:24px; height:24px; z-index:1;
+  opacity:0.2; transition: opacity 0.3s;
+}
+#hero:hover .corner { opacity:0.35; }
+.c-tl { top:32px; left:40px; border-top:1.5px solid var(--navy); border-left:1.5px solid var(--navy); }
+.c-tr { top:32px; right:40px; border-top:1.5px solid var(--navy); border-right:1.5px solid var(--navy); }
+.c-bl { bottom:88px; left:40px; border-bottom:1.5px solid var(--navy); border-left:1.5px solid var(--navy); }
+.c-br { bottom:88px; right:40px; border-bottom:1.5px solid var(--navy); border-right:1.5px solid var(--navy); }
+
+/* ── Floating blobs ── */
+.blob {
+  position:absolute; border-radius:50%;
+  filter: blur(70px); pointer-events:none;
+  animation: blobDrift 18s ease-in-out infinite alternate;
+}
+.blob-1 {
+  width:560px; height:460px;
+  background: radial-gradient(ellipse, rgba(28,43,69,0.2) 0%, transparent 70%);
+  top:-80px; left:-100px; animation-duration:20s;
+}
+.blob-2 {
+  width:420px; height:420px;
+  background: radial-gradient(ellipse, rgba(28,43,69,0.14) 0%, transparent 70%);
+  top:20%; right:-80px; animation-duration:25s; animation-delay:-8s;
+}
+.blob-3 {
+  width:340px; height:340px;
+  background: radial-gradient(ellipse, rgba(28,43,69,0.16) 0%, transparent 70%);
+  bottom:10%; left:25%; animation-duration:22s; animation-delay:-4s;
+}
+@keyframes blobDrift {
+  0%   { transform: translate(0,0) scale(1); }
+  33%  { transform: translate(30px,-20px) scale(1.05); }
+  66%  { transform: translate(-20px,30px) scale(0.97); }
+  100% { transform: translate(10px,10px) scale(1.03); }
+}
+
+/* ── Dot grid ── */
+.dot-grid {
+  position:absolute; inset:0; pointer-events:none;
+  background-image: radial-gradient(circle, rgba(28,43,69,0.14) 1px, transparent 1px);
+  background-size: 36px 36px;
+  mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, black 20%, transparent 80%);
+}
+
+/* ── Hero content z-index ── */
+.hero-content { position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; }
+
+.hero-badge {
+  display:inline-flex; align-items:center; gap:8px;
+  background: var(--emerald-mist);
+  border: 1px solid rgba(28,43,69,0.2);
+  color: var(--emerald); font-size:11px; font-weight:600;
+  letter-spacing:0.1em; text-transform:uppercase;
+  padding: 6px 16px; border-radius:100px; margin-bottom:36px;
+  position:relative;
+}
+.badge-dot {
+  width:6px; height:6px; background:var(--emerald);
+  border-radius:50%; animation: badgePulse 2.5s infinite;
+}
+@keyframes badgePulse {
+  0%,100% { opacity:1; box-shadow: 0 0 0 0 rgba(28,43,69,0.4); }
+  50% { opacity:0.7; box-shadow: 0 0 0 5px rgba(28,43,69,0); }
+}
+
+.hero-title {
+  font-family: var(--serif);
+  font-size: clamp(58px, 9vw, 110px);
+  font-weight:300; line-height:1.0; letter-spacing:-0.02em;
+  margin-bottom:28px; color: var(--navy);
+}
+.hero-title em { font-style:italic; color: var(--emerald); }
+
+.hero-sub {
+  font-size:17px; color: var(--ink-dim); font-weight:300;
+  max-width:500px; line-height:1.75; margin-bottom:52px;
+}
+
+.hero-btns { display:flex; gap:14px; justify-content:center; align-items:center; }
+
+.btn-p {
+  background: var(--emerald); color: var(--cream);
+  padding:14px 34px; border-radius:var(--r);
+  font-size:14px; font-weight:600; text-decoration:none;
+  letter-spacing:0.01em;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 18px rgba(28,43,69,0.22);
+}
+.btn-p:hover {
+  background: var(--navy); transform:translateY(-2px);
+  box-shadow: 0 8px 28px rgba(28,43,69,0.18);
+}
+
+.btn-s {
+  color: var(--ink-dim); padding:14px 26px; border-radius:var(--r);
+  font-size:14px; font-weight:500; text-decoration:none;
+  border: 1px solid var(--border-mid); transition: all 0.2s;
+}
+.btn-s:hover { color:var(--ink); border-color: var(--emerald); background: var(--emerald-mist); }
+
+/* Scroll cue */
+.hero-scroll {
+  position:absolute; bottom:38px; left:50%; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:9px;
+  color: var(--ink-faint); font-size:10px; letter-spacing:0.12em;
+  text-transform:uppercase; cursor:pointer; z-index:2;
+}
+.scroll-bar {
+  width:1px; height:44px;
+  background: linear-gradient(to bottom, var(--emerald), transparent);
+  animation: scrollAnim 2.2s ease-in-out infinite;
+}
+@keyframes scrollAnim {
+  0%   { transform:scaleY(0); transform-origin:top; opacity:1; }
+  50%  { transform:scaleY(1); transform-origin:top; opacity:1; }
+  51%  { transform:scaleY(1); transform-origin:bottom; opacity:1; }
+  100% { transform:scaleY(0); transform-origin:bottom; opacity:0; }
+}
+
+/* ── MARQUEE STRIP ─────────────────────────────────── */
+.marquee-wrap {
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  background: var(--cream);
+  overflow:hidden; padding:14px 0;
+}
+.marquee-track {
+  display:flex; gap:0; white-space:nowrap;
+  animation: marquee 28s linear infinite;
+}
+.marquee-item {
+  display:inline-flex; align-items:center; gap:24px;
+  padding:0 32px;
+  font-size:12px; font-weight:500; letter-spacing:0.1em;
+  text-transform:uppercase; color: var(--ink-dim);
+}
+.marquee-dot {
+  width:4px; height:4px; border-radius:50%;
+  background: var(--emerald); flex-shrink:0;
+}
+@keyframes marquee {
+  0%   { transform:translateX(0); }
+  100% { transform:translateX(-50%); }
+}
+
+/* ── SECTION SHELL ─────────────────────────────────── */
+.section-wrap {
+  max-width:1200px; margin:0 auto;
+  padding: 100px 48px;
+}
+
+.section-eyebrow {
+  display:inline-flex; align-items:center; gap:10px;
+  font-size:11px; font-weight:600; letter-spacing:0.12em;
+  text-transform:uppercase; color: var(--emerald); margin-bottom:18px;
+}
+.section-eyebrow::before {
+  content:''; width:24px; height:1.5px; background:var(--emerald);
+}
+
+.section-h {
+  font-family: var(--serif);
+  font-size: clamp(34px, 4.5vw, 58px);
+  font-weight:300; line-height:1.1; letter-spacing:-0.015em;
+  color: var(--navy); margin-bottom:18px;
+}
+.section-h em { font-style:italic; color:var(--emerald); }
+
+.section-p {
+  color: var(--ink-dim); font-size:16px; line-height:1.75;
+  max-width:520px; margin-bottom:56px;
+}
+
+/* ── SHOWREEL ──────────────────────────────────────── */
+#reel-wrap { max-width:1200px; margin:0 auto; padding:20px 48px 80px; }
+
+.reel-card {
+  border-radius: var(--rxl);
+  overflow:hidden; cursor:pointer;
+  position:relative;
+  aspect-ratio:21/9;
+  background: var(--navy);
+  border:1px solid rgba(28,43,69,0.12);
+  transition: transform 0.35s cubic-bezier(.22,1,.36,1),
+              box-shadow 0.35s cubic-bezier(.22,1,.36,1);
+}
+.reel-card:hover {
+  transform:translateY(-4px) scale(1.005);
+  box-shadow: 0 28px 60px rgba(28,43,69,0.18);
+}
+
+.reel-inner {
+  width:100%; height:100%;
+  background: linear-gradient(135deg, #0e1a2a 0%, #1c2b45 40%, #0f2318 70%, #1c2b45 100%);
+  display:flex; align-items:center; justify-content:center;
+  position:relative; overflow:hidden;
+}
+
+.reel-blob-1 {
+  position:absolute; width:50%; height:80%;
+  background: radial-gradient(ellipse, rgba(28,43,69,0.35) 0%, transparent 65%);
+  left:-5%; top:10%; filter:blur(50px);
+  animation: blobDrift 15s ease-in-out infinite alternate;
+}
+.reel-blob-2 {
+  position:absolute; width:40%; height:60%;
+  background: radial-gradient(ellipse, rgba(247,243,236,0.08) 0%, transparent 65%);
+  right:5%; bottom:0; filter:blur(60px);
+  animation: blobDrift 20s ease-in-out infinite alternate-reverse;
+}
+
+.reel-content {
+  position:relative; z-index:1; text-align:center;
+}
+.reel-eyebrow {
+  font-size:11px; font-weight:600; letter-spacing:0.16em;
+  text-transform:uppercase; color:rgba(200,222,215,0.7); margin-bottom:10px;
+}
+.reel-title {
+  font-family:var(--serif); font-size:clamp(28px,4vw,48px);
+  font-weight:300; font-style:italic; color: var(--ivory); margin-bottom:6px;
+}
+.reel-sub { font-size:13px; color:rgba(247,243,236,0.45); margin-bottom:28px; }
+
+.reel-play {
+  width:66px; height:66px; background:var(--emerald);
+  border-radius:50%; display:flex; align-items:center; justify-content:center;
+  margin:0 auto;
+  transition: transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 6px 24px rgba(28,43,69,0.4);
+}
+.reel-card:hover .reel-play {
+  transform:scale(1.1);
+  box-shadow: 0 10px 36px rgba(28,43,69,0.5);
+}
+
+/* ── PORTFOLIO ─────────────────────────────────────── */
+#portfolio-wrap { max-width:1200px; margin:0 auto; padding:0 48px 100px; }
+
+/* Tab bar */
+.tab-row {
+  display:flex; gap:3px; margin-bottom:44px;
+  background:var(--cream); padding:4px;
+  border-radius:var(--rl); border:1px solid var(--border);
+  overflow-x:auto; scrollbar-width:none;
+}
+.tab-row::-webkit-scrollbar { display:none; }
+
+.tab-btn {
+  flex:1; min-width:110px; padding:10px 18px;
+  border-radius:12px; font-size:12px; font-weight:500;
+  letter-spacing:0.03em; color:var(--ink-faint);
+  cursor:pointer; transition:all 0.22s;
+  background:transparent; border:none; white-space:nowrap;
+  text-align:center; font-family:var(--sans);
+}
+.tab-btn:hover { color:var(--ink-dim); }
+.tab-btn.on {
+  background:var(--ivory); color:var(--navy);
+  font-weight:600;
+  border:1px solid var(--border-mid);
+  box-shadow: 0 1px 4px rgba(28,43,69,0.06);
+}
+
+.tab-pane { display:none; }
+.tab-pane.on { display:block; }
+
+/* Video grid */
+.vgrid { display:grid; gap:20px; }
+.vgrid-3 { grid-template-columns:repeat(3,1fr); }
+.vgrid-2 { grid-template-columns:repeat(2,1fr); }
+.vgrid-feat { grid-template-columns:2fr 1fr; }
+.vgrid-feat-col { display:flex; flex-direction:column; gap:20px; }
+
+/* Video card */
+.vcard {
+  background:var(--cream); border:1px solid var(--border);
+  border-radius:var(--rl); overflow:hidden; cursor:pointer;
+  transition: transform 0.3s cubic-bezier(.22,1,.36,1),
+              box-shadow 0.3s cubic-bezier(.22,1,.36,1),
+              border-color 0.3s;
+}
+.vcard:hover {
+  transform:translateY(-4px);
+  box-shadow: 0 16px 40px rgba(28,43,69,0.1);
+  border-color: rgba(28,43,69,0.25);
+}
+
+.vthumb {
+  aspect-ratio:16/9; position:relative; overflow:hidden;
+  background: var(--navy);
+}
+.vthumb.vert { aspect-ratio:9/16; }
+
+.vthumb-inner {
+  width:100%; height:100%;
+  display:flex; align-items:center; justify-content:center;
+  position:relative; overflow:hidden;
+}
+
+/* Thumb gradients — navy/emerald on cream cards = nice contrast */
+.g-brand   { background: linear-gradient(135deg,#0f1d30 0%,#1c3a28 55%,#0a1520 100%); }
+.g-product { background: linear-gradient(135deg,#0c1928 0%,#132438 55%,#0a1a28 100%); }
+.g-ugc     { background: linear-gradient(135deg,#1a1228 0%,#28183c 55%,#120f20 100%); }
+.g-story   { background: linear-gradient(135deg,#1c0e22 0%,#2a1535 55%,#120c18 100%); }
+.g-motion  { background: linear-gradient(135deg,#0c1f1a 0%,#13302a 55%,#081512 100%); }
+
+.thumb-orb {
+  position:absolute; border-radius:50%;
+  filter:blur(28px); pointer-events:none;
+  animation: orbDrift 7s ease-in-out infinite alternate;
+}
+@keyframes orbDrift {
+  0%   { transform:translate(-8%,-8%) scale(1); }
+  100% { transform:translate(8%,8%) scale(1.12); }
+}
+
+.o-em  { background:radial-gradient(circle,rgba(28,43,69,0.7) 0%,transparent 70%); width:55%;height:55%; }
+.o-nav { background:radial-gradient(circle,rgba(61,138,106,0.5) 0%,transparent 70%); width:65%;height:65%; }
+.o-iv  { background:radial-gradient(circle,rgba(247,243,236,0.25) 0%,transparent 70%); width:50%;height:50%; }
+.o-pu  { background:radial-gradient(circle,rgba(130,80,180,0.5) 0%,transparent 70%); width:60%;height:60%; }
+.o-ro  { background:radial-gradient(circle,rgba(190,80,110,0.45) 0%,transparent 70%); width:60%;height:60%; }
+
+/* Scan lines overlay */
+.scan-lines {
+  position:absolute; inset:0; pointer-events:none;
+  background-image: repeating-linear-gradient(
+    0deg, transparent, transparent 3px,
+    rgba(247,243,236,0.018) 3px, rgba(247,243,236,0.018) 4px
+  );
+}
+
+.play-layer {
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(28,43,69,0);
+  transition:background 0.2s; z-index:2;
+}
+.vcard:hover .play-layer { background:rgba(28,43,69,0.28); }
+
+.play-ring {
+  width:46px; height:46px; border-radius:50%;
+  background:var(--emerald);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; transform:scale(0.8);
+  transition:opacity 0.22s, transform 0.22s;
+  box-shadow: 0 4px 20px rgba(28,43,69,0.5);
+}
+.vcard:hover .play-ring { opacity:1; transform:scale(1); }
+
+.dur-badge {
+  position:absolute; bottom:10px; right:10px;
+  background:rgba(12,22,36,0.75);
+  color:rgba(247,243,236,0.9); font-size:11px; font-weight:600;
+  padding:3px 8px; border-radius:6px; z-index:3;
+}
+
+.ai-pill {
+  position:absolute; top:10px; left:10px;
+  background:rgba(28,43,69,0.22);
+  border:1px solid rgba(28,43,69,0.45);
+  color:rgba(200,222,215,0.95); font-size:10px; font-weight:600;
+  padding:3px 8px; border-radius:100px; letter-spacing:0.07em;
+  text-transform:uppercase; z-index:3;
+}
+
+.status-pill {
+  position:absolute; top:10px; right:10px;
+  font-size:10px; font-weight:600; padding:3px 8px;
+  border-radius:100px; letter-spacing:0.06em;
+  text-transform:uppercase; z-index:3;
+}
+.st-live {
+  background:rgba(28,43,69,0.22); border:1px solid rgba(28,43,69,0.45);
+  color:rgba(200,222,215,0.9);
+}
+.st-wip {
+  background:rgba(200,160,60,0.18); border:1px solid rgba(200,160,60,0.35);
+  color:rgba(230,190,80,0.95);
+}
+
+.vinfo { padding:18px 20px 20px; }
+.vtitle {
+  font-family:var(--serif); font-size:18px; font-weight:400;
+  color:var(--navy); margin-bottom:6px; line-height:1.3;
+}
+.vmeta {
+  font-size:12px; color:var(--ink-faint);
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+}
+.vdot { width:3px;height:3px; background:var(--ink-faint); border-radius:50%; }
+.vtags { display:flex; gap:6px; margin-top:12px; flex-wrap:wrap; }
+.vtag {
+  font-size:11px; font-weight:500; padding:3px 10px;
+  border-radius:100px; background:var(--ivory);
+  border:1px solid var(--border); color:var(--ink-dim);
+}
+
+/* ── ABOUT ─────────────────────────────────────────── */
+#about-wrap { max-width:1200px; margin:0 auto; padding:100px 48px; }
+
+.about-grid { display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; }
+
+.about-vis {
+  border-radius:var(--rxl); overflow:hidden;
+  aspect-ratio:4/5; position:relative;
+  background:var(--navy);
+  border:1px solid rgba(28,43,69,0.12);
+  box-shadow: 0 24px 60px rgba(28,43,69,0.12);
+}
+.about-vis-inner {
+  width:100%;height:100%;
+  background:linear-gradient(160deg,#0f1d30 0%,#1a2e20 50%,#1c2b45 100%);
+  display:flex; align-items:center; justify-content:center;
+  position:relative; overflow:hidden;
+}
+.av-blob1 {
+  position:absolute; width:280px;height:280px;
+  background:radial-gradient(circle,rgba(28,43,69,0.4) 0%,transparent 65%);
+  top:8%;left:15%; filter:blur(30px);
+  animation:blobDrift 12s ease-in-out infinite alternate;
+}
+.av-blob2 {
+  position:absolute; width:220px;height:220px;
+  background:radial-gradient(circle,rgba(247,243,236,0.09) 0%,transparent 65%);
+  bottom:15%;right:8%; filter:blur(40px);
+  animation:blobDrift 16s ease-in-out infinite alternate-reverse;
+}
+.av-monogram {
+  font-family:var(--serif); font-size:100px; font-weight:300;
+  font-style:italic; color:rgba(247,243,236,0.1);
+  letter-spacing:-0.05em; position:relative; z-index:1; user-select:none;
+}
+
+.about-stats {
+  position:absolute; bottom:24px; left:20px; right:20px;
+  display:flex; gap:10px;
+}
+.astat {
+  flex:1; background:rgba(247,243,236,0.07);
+  border:1px solid rgba(247,243,236,0.1);
+  border-radius:var(--r); padding:12px 14px;
+  backdrop-filter:blur(8px);
+}
+.astat-n {
+  font-family:var(--serif); font-size:30px; font-weight:300;
+  font-style:italic; color:var(--emerald-soft); line-height:1;
+  margin-bottom:3px;
+}
+.astat-l { font-size:10px; color:rgba(247,243,236,0.45); letter-spacing:0.05em; }
+
+.about-body p {
+  font-size:16px; color:var(--ink-dim); line-height:1.8;
+  margin-bottom:20px;
+}
+
+.tools-head {
+  font-size:11px; font-weight:600; letter-spacing:0.1em;
+  text-transform:uppercase; color:var(--ink-faint); margin-bottom:10px;
+  margin-top:36px;
+}
+.tools-row { display:flex; flex-wrap:wrap; gap:8px; }
+
+.tool-chip {
+  display:flex; align-items:center; gap:7px;
+  background:var(--cream); border:1px solid var(--border);
+  border-radius:var(--r); padding:7px 14px;
+  font-size:13px; font-weight:500; color:var(--ink-dim);
+  transition:border-color 0.2s, color 0.2s, background 0.2s;
+}
+.tool-chip:hover {
+  border-color:rgba(28,43,69,0.35);
+  color:var(--navy); background:var(--emerald-mist);
+}
+.tool-dot { width:7px;height:7px; border-radius:50%; flex-shrink:0; }
+
+/* ── PROCESS ───────────────────────────────────────── */
+#process-wrap {
+  background:var(--navy); padding:100px 48px;
+}
+#process-wrap .inner { max-width:1200px; margin:0 auto; }
+
+#process-wrap .section-eyebrow { color:var(--emerald-soft); }
+#process-wrap .section-eyebrow::before { background:var(--emerald-soft); }
+#process-wrap .section-h { color:var(--ivory); }
+#process-wrap .section-h em { color:var(--emerald-soft); }
+#process-wrap .section-p { color:rgba(247,243,236,0.55); }
+
+.proc-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; }
+
+.proc-card {
+  background:rgba(247,243,236,0.05);
+  border:1px solid rgba(247,243,236,0.08);
+  border-radius:var(--rl); padding:28px 22px;
+  transition:border-color 0.3s, background 0.3s, transform 0.3s;
+}
+.proc-card:hover {
+  border-color:rgba(28,43,69,0.4);
+  background:rgba(28,43,69,0.07);
+  transform:translateY(-3px);
+}
+
+.proc-num {
+  font-family:var(--serif); font-size:68px; font-weight:300;
+  font-style:italic; color:rgba(247,243,236,0.07);
+  line-height:1; margin-bottom:16px; user-select:none;
+}
+.proc-title {
+  font-size:15px; font-weight:600; color:var(--ivory);
+  margin-bottom:8px;
+}
+.proc-desc { font-size:13px; color:rgba(247,243,236,0.45); line-height:1.65; }
+
+.proc-num-emerald { color:rgba(28,43,69,0.18) !important; }
+
+/* ── CONTACT ───────────────────────────────────────── */
+#contact-wrap {
+  max-width:700px; margin:0 auto;
+  padding:120px 48px; text-align:center;
+}
+
+.contact-h {
+  font-family:var(--serif);
+  font-size:clamp(42px,6vw,72px);
+  font-weight:300; line-height:1.1; letter-spacing:-0.02em;
+  color:var(--navy); margin-bottom:22px;
+}
+.contact-h em { font-style:italic; color:var(--emerald); }
+
+.contact-p {
+  font-size:17px; color:var(--ink-dim); line-height:1.75; margin-bottom:52px;
+}
+
+.c-links { display:flex; justify-content:center; gap:14px; flex-wrap:wrap; }
+
+.c-btn {
+  display:flex; align-items:center; gap:9px;
+  padding:13px 24px; border-radius:var(--r);
+  font-size:14px; font-weight:500; text-decoration:none;
+  transition:all 0.22s;
+}
+.c-btn.main {
+  background:var(--emerald); color:var(--cream); font-weight:600;
+  box-shadow: 0 4px 18px rgba(28,43,69,0.22);
+}
+.c-btn.main:hover { background:var(--navy); box-shadow:0 8px 28px rgba(28,43,69,0.18); }
+.c-btn.sec {
+  border:1px solid var(--border-mid); color:var(--ink-dim);
+}
+.c-btn.sec:hover { border-color:var(--emerald); color:var(--navy); background:var(--emerald-mist); }
+
+/* ── FOOTER ────────────────────────────────────────── */
+footer {
+  border-top:1px solid var(--border);
+  padding:28px 48px;
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--cream);
+}
+.footer-l { font-family:var(--serif); font-size:14px; color:var(--ink-faint); }
+.footer-r {
+  display:flex; align-items:center; gap:8px;
+  font-size:12px; color:var(--ink-faint);
+}
+.footer-pill {
+  background:var(--emerald-mist); border:1px solid rgba(28,43,69,0.2);
+  color:var(--emerald); padding:2px 9px; border-radius:100px;
+  font-size:10px; font-weight:600; letter-spacing:0.07em; text-transform:uppercase;
+}
+
+/* ── MODAL ─────────────────────────────────────────── */
+.modal-bg {
+  position:fixed; inset:0; z-index:200;
+  background:rgba(28,43,69,0.6); backdrop-filter:blur(10px);
+  display:flex; align-items:center; justify-content:center; padding:40px;
+  opacity:0; pointer-events:none;
+  transition:opacity 0.25s;
+}
+.modal-bg.on { opacity:1; pointer-events:all; }
+
+.modal-box {
+  background:var(--cream); border:1px solid var(--border-mid);
+  border-radius:var(--rxl); max-width:680px; width:100%;
+  overflow:hidden; position:relative;
+  transform:scale(0.95); transition:transform 0.25s;
+  box-shadow:0 32px 80px rgba(28,43,69,0.18);
+}
+.modal-bg.on .modal-box { transform:scale(1); }
+
+.modal-vid {
+  aspect-ratio:16/9; background:var(--navy);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--serif); font-style:italic;
+  color:rgba(247,243,236,0.35); font-size:17px;
+}
+.modal-body { padding:26px; }
+.modal-title {
+  font-family:var(--serif); font-size:24px; font-weight:400;
+  color:var(--navy); margin-bottom:8px;
+}
+.modal-desc { font-size:14px; color:var(--ink-dim); line-height:1.7; }
+
+.modal-close {
+  position:absolute; top:14px; right:14px;
+  width:32px;height:32px; background:var(--ivory);
+  border:1px solid var(--border); border-radius:50%;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  color:var(--ink-dim); font-size:16px; transition:background 0.2s;
+  z-index:10;
+}
+.modal-close:hover { background:var(--beige); }
+
+/* ── RESPONSIVE ────────────────────────────────────── */
+@media(max-width:960px){
+  nav { padding:0 24px; }
+  .nav-links { display:none; }
+  .section-wrap,.about-wrap,#reel-wrap,#portfolio-wrap,#process-wrap .inner,#contact-wrap { padding-left:24px;padding-right:24px; }
+  .vgrid-3 { grid-template-columns:1fr 1fr; }
+  .vgrid-feat { grid-template-columns:1fr; }
+  .about-grid { grid-template-columns:1fr; gap:48px; }
+  .proc-grid { grid-template-columns:1fr 1fr; }
+  footer { flex-direction:column;gap:10px;text-align:center; }
+}
+@media(max-width:600px){
+  .vgrid-3,.vgrid-2 { grid-template-columns:1fr; }
+  .proc-grid { grid-template-columns:1fr; }
+  .hero-btns { flex-direction:column; }
+  .c-links { flex-direction:column;align-items:center; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#hero" class="nav-logo" onclick="go(event,'hero')">Oliwia <em>Jarząbek</em></a>
+  <ul class="nav-links">
+    <li><a href="#reel" onclick="go(event,'reel-wrap')">Showreel</a></li>
+    <li><a href="#portfolio" onclick="go(event,'portfolio-wrap')">Work</a></li>
+    <li><a href="#about" onclick="go(event,'about-wrap')">About</a></li>
+    <li><a href="#process" onclick="go(event,'process-wrap')">Process</a></li>
+    <li><a href="#contact" onclick="go(event,'contact-wrap')" class="nav-cta">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <!-- blobs -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <!-- dot grid -->
+  <div class="dot-grid"></div>
+
+  <!-- concentric rings -->
+  <div class="hero-rings" id="hero-rings">
+    <div class="ring ring-1" data-depth="0.012"></div>
+    <div class="ring ring-2" data-depth="0.02"></div>
+    <div class="ring ring-3" data-depth="0.03"></div>
+    <div class="ring ring-4" data-depth="0.025"></div>
+  </div>
+
+  <!-- ghost word -->
+  <div class="hero-ghost">
+    <span class="ghost-word" id="ghost-word">OJ</span>
+  </div>
+
+  <!-- floating cross marks -->
+  <div class="hero-marks">
+    <div class="mark" style="top:18%;left:9%;"  data-depth="0.06"></div>
+    <div class="mark" style="top:72%;left:7%;"  data-depth="0.04"></div>
+    <div class="mark" style="top:14%;right:8%;" data-depth="0.05"></div>
+    <div class="mark" style="top:68%;right:10%;"data-depth="0.07"></div>
+    <div class="mark" style="top:42%;left:4%;" data-depth="0.03"></div>
+    <div class="mark" style="top:38%;right:5%;"data-depth="0.055"></div>
+  </div>
+
+  <!-- corner brackets -->
+  <div class="corner c-tl"></div>
+  <div class="corner c-tr"></div>
+  <div class="corner c-bl"></div>
+  <div class="corner c-br"></div>
+
+  <!-- content -->
+  <div class="hero-content">
+    <div class="hero-badge reveal up stagger-1">
+      <span class="badge-dot"></span>
+      Available for projects
+    </div>
+    <h1 class="hero-title reveal up stagger-2">AI Video<br><em>Creator</em></h1>
+    <p class="hero-sub reveal up stagger-3">Cinematic AI-generated content — brand films, product ads, social content, and visual storytelling powered by Higgsfield.</p>
+    <div class="hero-btns reveal up stagger-4">
+      <a href="#portfolio" class="btn-p" onclick="go(event,'portfolio-wrap')">View my work</a>
+      <a href="#reel" class="btn-s" onclick="go(event,'reel-wrap')">Watch showreel</a>
+    </div>
+  </div>
+
+  <div class="hero-scroll" onclick="goid('reel-wrap')">
+    <div class="scroll-bar"></div>
+    Scroll
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap reveal up">
+  <div class="marquee-track">
+    <!-- repeated twice for seamless loop -->
+    <span class="marquee-item"><span class="marquee-dot"></span>Brand Films</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Product Ads</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>UGC Content</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>AI Storytelling</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Motion VFX</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Higgsfield Soul Engine</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>SoulID</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Character Consistency</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Cinematic AI</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Brand Films</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Product Ads</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>UGC Content</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>AI Storytelling</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Motion VFX</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Higgsfield Soul Engine</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>SoulID</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Character Consistency</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>Cinematic AI</span>
+  </div>
+</div>
+
+<!-- SHOWREEL -->
+<div id="reel-wrap" class="reveal up" style="max-width:1200px;margin:0 auto;padding:80px 48px 0;">
+  <div class="section-eyebrow reveal left">2026 Showreel</div>
+  <div class="reel-card reveal scale" style="margin-top:20px;" onclick="openModal('showreel')">
+    <div class="reel-inner">
+      <div class="reel-blob-1"></div>
+      <div class="reel-blob-2"></div>
+      <div class="reel-content">
+        <div class="reel-eyebrow">AI Video Portfolio — 2026</div>
+        <div class="reel-title">Full Showreel</div>
+        <div class="reel-sub">Higgsfield · Soul Engine · SoulID · Kling · Runway</div>
+        <div class="reel-play">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M8 5L17 11L8 17V5Z" fill="#F7F3EC"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PORTFOLIO -->
+<div id="portfolio-wrap" style="max-width:1200px;margin:0 auto;padding:100px 48px;">
+  <div class="section-eyebrow reveal left">Selected work</div>
+  <h2 class="section-h reveal up">Five categories,<br><em>unlimited range.</em></h2>
+  <p class="section-p reveal up">From luxury brand films to platform-native UGC — each section shows a different dimension of AI video production.</p>
+
+  <div class="tab-row reveal up">
+    <button class="tab-btn on" data-t="brand" onclick="tab('brand')">Brand Films</button>
+    <button class="tab-btn" data-t="product" onclick="tab('product')">Product Ads</button>
+    <button class="tab-btn" data-t="ugc" onclick="tab('ugc')">UGC Social</button>
+    <button class="tab-btn" data-t="story" onclick="tab('story')">Storytelling</button>
+    <button class="tab-btn" data-t="motion" onclick="tab('motion')">Motion & VFX</button>
+  </div>
+
+  <!-- BRAND -->
+  <div id="pane-brand" class="tab-pane on">
+    <div class="vgrid vgrid-3">
+      <div class="vcard reveal up stagger-1" onclick="openModal('brand1')">
+        <div class="vthumb"><div class="vthumb-inner g-brand">
+          <div class="thumb-orb o-em" style="animation-delay:0s"></div>
+          <div class="scan-lines"></div>
+          <div class="play-layer"><div class="play-ring"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4 2L11 6.5L4 11V2Z" fill="#F7F3EC"/></svg></div></div>
+        </div>
+          <div class="ai-pill">Higgsfield</div>
+          <div class="status-pill st-wip">In production</div>
+          <div class="dur-badge">0:08</div>
+        </div>
+        <div class="vinfo">
+          <div class="vtitle">Perfume Campaign — Golden Hour</div>
+          <div class="vmeta"><span>Brand film</span><span class="vdot"></span><span>Soul Engine</span><span class="vdot"></span><span>16:9</span></div>
+          <div class="vtags"><span class="vtag">Fashion</span><span class="vtag">Beauty</span><span class="vtag">Slow-mo</span></div>
+        </div>
+      </div>
+      <div class="vcard reveal up stagger-2" onclick="openModal('brand2')">
+        <div class="vthumb"><div class="vthumb-inner g-brand">
+          <div class="thumb-orb o-nav" style="animation-delay:-3s;opacity:0.8"></div>
+          <div class="scan-lines"></div>
+          <div class="play-layer"><div class="play-ring"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4 2L11 6.5L4 11V2Z" fill="#F7F3EC"/></svg></div></div>
+        </div>
+          <div class="ai-pill">Higgsfield</div>
+          <div class="status-pill st-wip">In production</div>
+          <div class="dur-badge">0:12</div>
+        </div>
+        <div class="vinfo">
+          <div class="vtitle">Fashion Film — Warsaw Streets</div>
+          <div class="vmeta"><span>Brand film</span><span class="vdot"></span><span>SoulID</span><span class="vdot"></span><span>16:9</span></div>
+          <div class="vtags"><span class="vtag">Fashion</span><span class="vtag">Character</span><span class="vtag">Narrative</span></div>
+        </div>
+      </div>
+      <div class="vcard reveal up stagger-3" onclick="openModal('brand3')">
+        <div class="vthumb"><div class="vthumb-inner g-brand">
+          <div class="thumb-orb o-iv" style="animation-delay:-6s"></div>
+          <div class="scan-lines"></div>
+          <div class="play-layer"><div class="play-ring"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4 2L11 6.5L4 11V2Z" fill="#F7F3EC"/></svg></div></div>
+        </div>
+          <div class="ai-pill">Higgsfield</div>
+          <div class="status-pill st-wip">In production</div>
+          <div class="dur-badge">0:06</div>
+        </div>
+        <div class="vinfo">
+          <div class="vtitle">Skincare Product — Micro Glow</div>
+          <div class="vmeta"><span>Brand film</span><span class="vdot"></span><span>Soul Engine</span><span class="vdot"></span><span>16:9</span></div>
+          <div class="vtags"><span class="vtag">Skincare</span><span class="vtag">Close-up</span><span class="vtag">Beauty</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCT -->
+  <div id="pane-product" class="tab-pane">
+    <div class="vgrid vgrid-3">
+      <div class="vcard reveal up stagger-1" onclick="openModal('product1')">
+        <div class="vthumb"><div class="vthumb-inner g-product">
+          <div class="thumb-orb o-nav" style="animation-delay:0s"></div>
+          <div class="scan-lines"></div>
+          <div class="play-layer"><div class="play-ring"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4 2L11 6.5L4 11V2Z" fill="#F7F3EC"/></svg></div></div>
+        </div>
+          <div class="ai-pill">Higgsfield</div><div class="status-pill st-wip">In production</div><div class="dur-badge">0:10</div>
+        </div>
+        <div class="vinfo">
+          <div class="vtitle">Sneaker 360 — Studio Reveal</div>
+          <div class="vmeta"><span>Product ad</span><span class="vdot"></span><span>Soul Engine</span></div>
+          <div class="vtags"><span class="vtag">Ecommerce</span><span class="vtag">360°</span><span class="vtag">Studio</span></div>
+        </div>
+      </div>
+      <div class="vcard reveal up stagger-2" onclick="openModal('product2')">
+        <div class="vthumb"><div class="vthumb-inner g-product">
+          <div class="thumb-orb o-em" style="animation-delay:-4s;opacity:0.6"></div>
+          <div class="scan-lines"></div>
+          <div class="play-layer"><div class="play-ring"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4 2L11 6.5L4 11V2Z" fill="#F7F3EC"/></svg></div></div>
+        </div>
+          <div class="ai-pill">Higgsfield</div><div class="status-pill st-wip">In production</div><div class="dur-badge">0:08</div>
+        </div>
+        <div class="vinfo">
+          <div class="vtitle">Coffee Brand — Rising Steam</div>
+          <div class="vmeta"><span>Product ad</span><span class="vdot"></span><span>Kling</span></div>
+          <div class="vtags"><span class="vtag">Food & Bev</span><span class="vtag">Moody</span><span class="vtag">Slow-mo</span></div>
+        </div>
+      </div>
+      <div class="vcard reveal up stagger-3" onclick="openModal('product3')">
+        <div class="vthumb"><div class="vthumb-inner g-product">
+          <div class="thumb-orb o-iv" style="animation-delay:-8s"></div>
+          <div class="scan-lines"></div>
+          <div class="play-layer"><div class="play-ring"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4 2L11 6.5L4 11V2Z" fill="#F7F3EC"/></svg></div></div>
+        </div>
+          <div class="ai-pill">Higgsfield</div><div class="status-pill st-wip">In production</div><div class="dur-badge">0:07</div>
+        </div>
+        <div class="vinfo">
+          <div class="vtitle">Serum Drop — Liquid Macro</div>
+          <div class="vmeta"><span>Product ad</span><span class="vdot"></span><span>Soul Engine</span></div>
+          <div class="vtags"><span class="vtag">Skincare</span><span class="vtag">Macro</span><span class="vtag">Beauty</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UGC -->
+  <div id="pane-ugc" class="tab-pane">
+    <div class="vgrid vgrid-3">
+      <div class="vcard reveal up stagger-1" onclick="openModal('ugc1')">
+        <div class="vthumb vert"><div class="vthumb-inner g-ugc">
+          <div class="thumb-orb o-pu" style="animation-delay:0s"></div>
+          <div class="scan-lines"></div>
+          <div class="play-layer"><div class="play-ring"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4 2L11 6.5L4 11V2Z" fill="#F7F3EC"/></svg></div></div>
+        </div>
+          <div class="ai-pill">Higgsfield</div><div class="status-pill st-wip">In production</div><div class="dur-badge">0:15</div>
+        </div>
+        <div class="vinfo">
+          <div class="vtitle">Morning Routine — Vlog Style</div>
+          <div class="vmeta"><span>UGC</span><span class="vdot"></span><span>SoulID</span><span class="vdot"></span><span>9:16</span></div>
+          <div class="vtags"><span class="vtag">TikTok</span><span class="vtag">Lifestyle</span></div>
+        </div>
+      </div>
+      <div class="vcard reveal up stagger-2" onclick="openModal('ugc2')">
+        <div class="vthumb vert"><div class="vthumb-inner g-ugc">
+          <div class="thumb-orb o-pu" style="animation-delay:-3s;opacity:0.75"></div>
+          <div class="scan-lines"></div>
+          <div class="play-layer"><div class="play-ring"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4 2L11 6.5L4 11V2Z" fill="#F7F3EC"/></svg></div></div>
+        </div>
+          <div class="ai-pill">Higgsfield</div><div class="status-pill st-wip">In production</div><div class="dur-badge">0:12</div>
+        </div>
+        <div class="vinfo">
+          <div class="vtitle">Fashion Try-On Transition</div>
+          <div class="vmeta"><span>UGC</span><span class="vdot"></span><span>SoulID</span><span class="vdot"></span><span>9:16</span></div>
+          <div class="vtags"><span class="vtag">Instagram</span><span class="vtag">GRWM</span></div>
+        </div>
+      </div>
+      <div class="vcard reveal up stagger-3" onclick="openModal('ugc3')">
+        <div class="vthumb vert"><div class="vthumb-inner g-ugc">
+          <div class="thumb-orb o-pu" style="animation-delay:-6s;opacity:0.85"></div>
+          <div class="scan-lines"></div>
+          <div class="play-layer"><div class="play-ring"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4 2L11 6.5L4 11V2Z" fill="#F7F3EC"/></svg></div></div>
+        </div>
+          <div class="ai-pill">Higgsfield</div><div class="status-pill st-wip">In production</div><div class="dur-badge">0:10</div>
+        </div>
+        <div class="vinfo">
+          <div class="vtitle">Gym & Fitness — Fast Cuts</div>
+          <div class="vmeta"><span>UGC</span><span class="vdot"></span><span>SoulID</span><span class="vdot"></span><span>9:16</span></div>
+          <div class="vtags"><span class="vtag">Reels</span><span class="vtag">Fitness</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STORY -->
+  <div id="pane-story" class="tab-pane">
+    <div class="vgrid vgrid-feat">
+      <div class="vcard reveal left" onclick="openModal('story1')">
+        <div class="vthumb"><div class="vthumb-inner g-story">
+          <div class="thumb-orb o-ro" style="width:70%;height:70%;animation-delay:0s"></div>
+          <div class="scan-lines"></div>
+          <div class="play-layer"><div class="play-ring"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4 2L11 6.5L4 11V2Z" fill="#F7F3EC"/></svg></div></div>
+        </div>
+          <div class="ai-pill">Higgsfield</div><div class="status-pill st-live">Featured</div><div class="dur-badge">0:45</div>
+        </div>
+        <div class="vinfo">
+          <div class="vtitle">Chrome &amp; Sand — Original Short Film</div>
+          <div class="vmeta"><span>Cinematic short</span><span class="vdot"></span><span>SoulID + Soul Engine</span><span class="vdot"></span><span>16:9</span></div>
+          <div class="vtags"><span class="vtag">Narrative</span><span class="vtag">Sci-fi</span><span class="vtag">Original</span></div>
+        </div>
+      </div>
+      <div class="vgrid-feat-col reveal right">
+        <div class="vcard" onclick="openModal('story2')">
+          <div class="vthumb"><div class="vthumb-inner g-story">
+            <div class="thumb-orb o-ro" style="animation-delay:-4s;opacity:0.7"></div>
+            <div class="scan-lines"></div>
+            <div class="play-layer"><div class="play-ring"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4 2L11 6.5L4 11V2Z" fill="#F7F3EC"/></svg></div></div>
+          </div>
+            <div class="ai-pill">Higgsfield</div><div class="status-pill st-wip">In production</div><div class="dur-badge">0:15</div>
+          </div>
+          <div class="vinfo">
+            <div class="vtitle">Dramatic Scene — Film Noir</div>
+            <div class="vmeta"><span>Short scene</span><span class="vdot"></span><span>SoulID</span></div>
+          </div>
+        </div>
+        <div class="vcard" onclick="openModal('story3')">
+          <div class="vthumb"><div class="vthumb-inner g-story">
+            <div class="thumb-orb o-em" style="animation-delay:-8s;opacity:0.65"></div>
+            <div class="scan-lines"></div>
+            <div class="play-layer"><div class="play-ring"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4 2L11 6.5L4 11V2Z" fill="#F7F3EC"/></svg></div></div>
+          </div>
+            <div class="ai-pill">Higgsfield</div><div class="status-pill st-wip">In production</div><div class="dur-badge">0:08</div>
+          </div>
+          <div class="vinfo">
+            <div class="vtitle">Desert Landscape — World-Build</div>
+            <div class="vmeta"><span>Environment</span><span class="vdot"></span><span>Soul Engine</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOTION -->
+  <div id="pane-motion" class="tab-pane">
+    <div class="vgrid vgrid-3">
+      <div class="vcard reveal up stagger-1" onclick="openModal('motion1')">
+        <div class="vthumb"><div class="vthumb-inner g-motion">
+          <div class="thumb-orb o-em" style="animation-delay:0s"></div>
+          <div class="scan-lines"></div>
+          <div class="play-layer"><div class="play-ring"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4 2L11 6.5L4 11V2Z" fill="#F7F3EC"/></svg></div></div>
+        </div>
+          <div class="ai-pill">Higgsfield</div><div class="status-pill st-wip">In production</div><div class="dur-badge">0:08</div>
+        </div>
+        <div class="vinfo">
+          <div class="vtitle">Chrome Liquid — Morphing</div>
+          <div class="vmeta"><span>Abstract VFX</span><span class="vdot"></span><span>Soul Engine</span></div>
+          <div class="vtags"><span class="vtag">Abstract</span><span class="vtag">Chrome</span></div>
+        </div>
+      </div>
+      <div class="vcard reveal up stagger-2" onclick="openModal('motion2')">
+        <div class="vthumb"><div class="vthumb-inner g-motion">
+          <div class="thumb-orb o-nav" style="animation-delay:-5s;opacity:0.8"></div>
+          <div class="scan-lines"></div>
+          <div class="play-layer"><div class="play-ring"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4 2L11 6.5L4 11V2Z" fill="#F7F3EC"/></svg></div></div>
+        </div>
+          <div class="ai-pill">Higgsfield</div><div class="status-pill st-wip">In production</div><div class="dur-badge">0:06</div>
+        </div>
+        <div class="vinfo">
+          <div class="vtitle">Digital Glitch — Neon Distort</div>
+          <div class="vmeta"><span>VFX</span><span class="vdot"></span><span>Soul Engine</span></div>
+          <div class="vtags"><span class="vtag">Glitch</span><span class="vtag">Neon</span></div>
+        </div>
+      </div>
+      <div class="vcard reveal up stagger-3" onclick="openModal('motion3')">
+        <div class="vthumb"><div class="vthumb-inner g-motion">
+          <div class="thumb-orb o-iv" style="animation-delay:-9s;opacity:0.6"></div>
+          <div class="scan-lines"></div>
+          <div class="play-layer"><div class="play-ring"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4 2L11 6.5L4 11V2Z" fill="#F7F3EC"/></svg></div></div>
+        </div>
+          <div class="ai-pill">Higgsfield</div><div class="status-pill st-wip">In production</div><div class="dur-badge">0:12</div>
+        </div>
+        <div class="vinfo">
+          <div class="vtitle">City Sunrise — AI Time-lapse</div>
+          <div class="vmeta"><span>Environment</span><span class="vdot"></span><span>Veo</span></div>
+          <div class="vtags"><span class="vtag">City</span><span class="vtag">Time-lapse</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<div id="about-wrap" style="background:var(--cream);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="about-grid" style="max-width:1200px;margin:0 auto;padding:100px 48px;align-items:center;display:grid;grid-template-columns:1fr 1fr;gap:80px;">
+    <div class="about-vis reveal left">
+      <div class="about-vis-inner">
+        <div class="av-blob1"></div>
+        <div class="av-blob2"></div>
+        <div class="av-monogram">OJ</div>
+      </div>
+      <div class="about-stats">
+        <div class="astat"><div class="astat-n">5</div><div class="astat-l">Content types</div></div>
+        <div class="astat"><div class="astat-n">3+</div><div class="astat-l">AI platforms</div></div>
+        <div class="astat"><div class="astat-n">PL/EN</div><div class="astat-l">Languages</div></div>
+      </div>
+    </div>
+    <div class="about-body reveal right">
+      <div class="section-eyebrow">About</div>
+      <h2 class="section-h">Oliwia <em>Jarząbek</em></h2>
+      <p>I'm an AI video creator based in San Francisco, working at the intersection of cinematic storytelling and generative AI. I specialise in Higgsfield's Soul Engine — using SoulID for character consistency, physics-based motion for realism, and cinematic camera work to make AI content that doesn't look like AI.</p>
+      <p>My background is in social media, content creation, and visual design. I work with clients across European and US markets.</p>
+      <div class="tools-head">Tools</div>
+      <div class="tools-row">
+        <div class="tool-chip"><span class="tool-dot" style="background:var(--emerald)"></span>Higgsfield</div>
+        <div class="tool-chip"><span class="tool-dot" style="background:var(--navy-mid)"></span>Kling</div>
+        <div class="tool-chip"><span class="tool-dot" style="background:#5a7a9a"></span>Runway</div>
+        <div class="tool-chip"><span class="tool-dot" style="background:#7a5a9a"></span>Veo</div>
+        <div class="tool-chip"><span class="tool-dot" style="background:#4a8a6a"></span>Luma</div>
+        <div class="tool-chip"><span class="tool-dot" style="background:#9a7a4a"></span>Canva</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROCESS -->
+<div id="process-wrap">
+  <div class="inner">
+    <div class="section-eyebrow reveal left">How I work</div>
+    <h2 class="section-h reveal up">From concept<br>to <em>final cut</em></h2>
+    <p class="section-p reveal up">Every project follows the same four-step process — so you always know where we are.</p>
+    <div class="proc-grid">
+      <div class="proc-card reveal up stagger-1">
+        <div class="proc-num">01</div>
+        <div class="proc-title">Brief & Direction</div>
+        <div class="proc-desc">We nail the concept, mood, format, and platform. I build a visual reference board and agree on what "done" looks like.</div>
+      </div>
+      <div class="proc-card reveal up stagger-2">
+        <div class="proc-num">02</div>
+        <div class="proc-title">SoulID & Assets</div>
+        <div class="proc-desc">Character consistency locked with SoulID. Reference images, brand assets, and style frames prepared before any generation starts.</div>
+      </div>
+      <div class="proc-card reveal up stagger-3">
+        <div class="proc-num">03</div>
+        <div class="proc-title">Generation & Iteration</div>
+        <div class="proc-desc">Clips generated, reviewed, refined. Motion, lighting, and camera work dialled in until every second looks intentional.</div>
+      </div>
+      <div class="proc-card reveal up stagger-4">
+        <div class="proc-num">04</div>
+        <div class="proc-title">Edit & Delivery</div>
+        <div class="proc-desc">Cut to music, colour graded, format-optimised for your platform. Delivered as ready-to-publish files.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACT -->
+<div id="contact-wrap" style="max-width:700px;margin:0 auto;padding:120px 48px;text-align:center;">
+  <div class="section-eyebrow reveal up" style="justify-content:center;">Let's work together</div>
+  <h2 class="contact-h reveal up">Ready to make<br>something <em>cinematic?</em></h2>
+  <p class="contact-p reveal up">Open to brand collaborations, product videos, social content, and longer-form AI film projects.</p>
+  <div class="c-links reveal up">
+    <a href="mailto:oliwiajarzabek03@gmail.com" class="c-btn main">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="4" width="12" height="9" rx="1.5" stroke="#FEFCF8" stroke-width="1.4"/><path d="M2 5.5L8 9.5L14 5.5" stroke="#FEFCF8" stroke-width="1.4" stroke-linecap="round"/></svg>
+      oliwiajarzabek03@gmail.com
+    </a>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-l">Oliwia Jarząbek — AI Video Creator</div>
+  <div class="footer-r"><span class="footer-pill">AI Video</span> Made with Higgsfield · 2026</div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal" onclick="closeBg(event)">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">&#x2715;</button>
+    <div class="modal-vid"><span id="m-placeholder">Video coming soon — in production</span></div>
+    <div class="modal-body">
+      <div class="modal-title" id="m-title"></div>
+      <div class="modal-desc" id="m-desc"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── SCROLL REVEAL ──────────────────────────────────────────
+const ro = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('vis');
+      ro.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.08 });
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+  // Kick hero items visible immediately
+  document.querySelectorAll('#hero .reveal').forEach(el => {
+    setTimeout(() => el.classList.add('vis'), 80);
+  });
+
+  // Nav scroll shadow
+  window.addEventListener('scroll', () => {
+    document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 30);
+  });
+});
+
+// ── SMOOTH NAV ─────────────────────────────────────────────
+function go(e, id) {
+  e.preventDefault();
+  goid(id);
+}
+function goid(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+// ── TABS ───────────────────────────────────────────────────
+function tab(id) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('on'));
+  document.querySelector('[data-t="'+id+'"]').classList.add('on');
+  document.getElementById('pane-'+id).classList.add('on');
+
+  // Reveal cards in the new tab
+  document.querySelectorAll('#pane-'+id+' .reveal').forEach(el => {
+    el.classList.remove('vis');
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        ro.observe(el);
+      });
+    });
+  });
+}
+
+// ── MODAL ──────────────────────────────────────────────────
+const MD = {
+  showreel: { t:'2026 AI Video Showreel', d:'A 60-second reel showcasing the full range — brand films, product ads, UGC content, cinematic storytelling, and motion VFX. All generated with Higgsfield Soul Engine and SoulID.' },
+  brand1: { t:'Perfume Campaign — Golden Hour', d:'Slow-motion cinematic brand film for a luxury fragrance. Warm golden-hour light, subtle lens flare, product close-up. Higgsfield Soul Engine, 16:9.' },
+  brand2: { t:'Fashion Film — Warsaw Streets', d:'SoulID-locked character walking through cobblestone streets. Trench coat, autumn palette, cinematic dolly push. Demonstrates character consistency across multiple shots.' },
+  brand3: { t:'Skincare Product — Micro Glow', d:'Ultra close-up skin visualization with diffused light. Serum dissolving into a radiant glow. Minimalist white studio aesthetic for high-end beauty brands.' },
+  product1: { t:'Sneaker 360 — Studio Reveal', d:'Product floating mid-air, 360-degree rotation with dramatic studio shadows. Clean studio background. High-converting ecommerce format for Meta and TikTok ads.' },
+  product2: { t:'Coffee Brand — Rising Steam', d:'Steam rising from a mug in ultra slow-motion. Rich amber and dark-brown grading. Moody kitchen environment. Lifestyle product ad with strong visual texture.' },
+  product3: { t:'Serum Drop — Liquid Macro', d:'A single drop of serum falling in extreme slow-mo. Macro lens aesthetic with clean typography overlay space. Optimised for beauty brand social ads.' },
+  ugc1: { t:'Morning Routine — Vlog Style', d:'Platform-native UGC content simulating an authentic creator day-in-the-life. Handheld feel, fast natural cuts. SoulID character consistency. 9:16 for TikTok and Reels.' },
+  ugc2: { t:'Fashion Try-On Transition', d:'Before/after outfit reveal with a trending transition cut. GRWM aesthetic, ring-light warmth. SoulID locked character. Optimised for Instagram Reels and TikTok shopping content.' },
+  ugc3: { t:'Gym & Fitness — Fast Cuts', d:'High-energy workout content with fast tempo cuts synced to music. Motivational framing. SoulID character. Performance-driven fitness content.' },
+  story1: { t:'Chrome & Sand — Original Short Film', d:'An original cinematic AI short. Two characters in a sci-fi environment — chrome architecture, vast desert, dramatic low-key lighting. Full SoulID production pipeline.' },
+  story2: { t:'Dramatic Scene — Film Noir', d:'Two characters in high tension. A look, a pause, a turn. No dialogue needed. Film noir lighting and composition through AI-generated cinematography.' },
+  story3: { t:'Desert Landscape — World-Build', d:'Sweeping aerial environment shot. Epic golden-hour desert landscape with dramatic camera movement. World-building through AI-generated visual environments.' },
+  motion1: { t:'Chrome Liquid — Morphing', d:'Abstract chrome liquid morphing through impossible shapes in ultra slow-motion. Perfect physical simulation. Highly shareable visual content with reuse value for brands.' },
+  motion2: { t:'Digital Glitch — Neon Distort', d:'Pixel glitch effects with neon color distortion. Digital art aesthetic. Works as transition element, social teaser, or standalone visual loop for music or tech brands.' },
+  motion3: { t:'City Sunrise — AI Time-lapse', d:'AI-generated urban time-lapse from night to sunrise. Ultra smooth interpolation. Shows technical range — environment, light physics, and cinematic scale.' }
+};
+
+function openModal(id) {
+  const d = MD[id] || { t:'Project', d:'Coming soon.' };
+  document.getElementById('m-title').textContent = d.t;
+  document.getElementById('m-desc').textContent = d.d;
+  document.getElementById('m-placeholder').textContent =
+    id === 'showreel' ? 'Add your YouTube embed here' : 'Video in production — check back soon';
+  document.getElementById('modal').classList.add('on');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('on');
+  document.body.style.overflow = '';
+}
+function closeBg(e) {
+  if (e.target === document.getElementById('modal')) closeModal();
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ── MOUSEMOVE PARALLAX ────────────────────────────────────
+(function(){
+  const hero = document.getElementById('hero');
+  if (!hero) return;
+  let raf;
+  hero.addEventListener('mousemove', (e) => {
+    if (raf) cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => {
+      const r  = hero.getBoundingClientRect();
+      const mx = (e.clientX - r.left - r.width  / 2) / (r.width  / 2);
+      const my = (e.clientY - r.top  - r.height / 2) / (r.height / 2);
+      const gw = document.getElementById('ghost-word');
+      if (gw) gw.style.transform = `translate(${mx * -30}px, ${my * -16}px)`;
+      document.querySelectorAll('#hero-rings .ring').forEach(el => {
+        const d = parseFloat(el.dataset.depth || 0.02) * 380;
+        el.style.transform = `translate(${mx * d}px, ${my * d}px)`;
+      });
+      document.querySelectorAll('.hero-marks .mark').forEach(el => {
+        const d = parseFloat(el.dataset.depth || 0.05) * 280;
+        el.style.transform = `translate(${mx * d}px, ${my * d}px)`;
+      });
+    });
+  });
+  hero.addEventListener('mouseleave', () => {
+    const gw = document.getElementById('ghost-word');
+    if (gw) gw.style.transform = '';
+    document.querySelectorAll('#hero-rings .ring, .hero-marks .mark')
+      .forEach(el => el.style.transform = '');
+  });
+})();
+</script>
+</body>
+</html>
