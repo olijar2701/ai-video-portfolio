@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Oliwia Jarząbek — AI Video Creator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter+Tight:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -14,19 +14,19 @@
   --ivory-deep:  #EDE8DF;
   --cream:       #FEFCF8;
   --beige:       #E8E1D5;
-  --emerald:     #1C2B45;
-  --emerald-mid: #2E4163;
-  --emerald-soft:#D0D8E8;
-  --emerald-mist:#E8EDF5;
-  --navy:        #1C2B45;
-  --navy-mid:    #2E4163;
-  --navy-soft:   #D0D8E8;
-  --ink:         #1C2B45;
-  --ink-dim:     #4A5C72;
+  --emerald:     #071936;
+  --emerald-mid: #102A4E;
+  --emerald-soft:#D4DEEF;
+  --emerald-mist:#EEF3FA;
+  --navy:        #071936;
+  --navy-mid:    #102A4E;
+  --navy-soft:   #D4DEEF;
+  --ink:         #071936;
+  --ink-dim:     #344A68;
   --ink-faint:   #8A9BB0;
   --border:      rgba(28,43,69,0.08);
   --border-mid:  rgba(28,43,69,0.14);
-  --serif: 'Cormorant Garamond', Georgia, serif;
+  --serif: 'Instrument Serif', Georgia, serif;
   --sans:  'Inter Tight', system-ui, sans-serif;
   --r:     10px;
   --rl:    18px;
@@ -36,7 +36,11 @@
 html { scroll-behavior: smooth; }
 
 body {
-  background: var(--ivory);
+  background:
+    radial-gradient(circle at 12% 6%, rgba(7,25,54,0.12), transparent 30%),
+    radial-gradient(circle at 92% 18%, rgba(16,42,78,0.08), transparent 28%),
+    linear-gradient(180deg, #FEFCF8 0%, #F7F3EC 42%, #EEF3FA 100%);
+  background-attachment: fixed;
   color: var(--ink);
   font-family: var(--sans);
   font-size: 15px;
@@ -435,15 +439,16 @@ nav.scrolled { box-shadow: 0 2px 20px rgba(28,43,69,0.07); }
 
 /* Video card */
 .vcard {
-  background:var(--cream); border:1px solid var(--border);
+  background:linear-gradient(180deg, rgba(254,252,248,0.96) 0%, rgba(247,243,236,0.98) 100%); border:1px solid rgba(7,25,54,0.10);
   border-radius:var(--rl); overflow:hidden; cursor:pointer;
   transition: transform 0.3s cubic-bezier(.22,1,.36,1),
               box-shadow 0.3s cubic-bezier(.22,1,.36,1),
               border-color 0.3s;
+  box-shadow: 0 10px 28px rgba(7,25,54,0.055);
 }
 .vcard:hover {
   transform:translateY(-4px);
-  box-shadow: 0 16px 40px rgba(28,43,69,0.1);
+  box-shadow: 0 24px 60px rgba(7,25,54,0.14);
   border-color: rgba(28,43,69,0.25);
 }
 
@@ -1101,16 +1106,17 @@ footer {
       </div>
       <div class="vgrid-feat-col reveal right">
         <div class="vcard" onclick="openModal('story2')">
-          <div class="vthumb"><div class="vthumb-inner g-story">
-            <div class="thumb-orb o-ro" style="animation-delay:-4s;opacity:0.7"></div>
-            <div class="scan-lines"></div>
+          <div class="vthumb" style="position:relative">
+            <video class="thumb-video" src="https://raw.githubusercontent.com/olijar2701/ai-video-portfolio/main/videos/podcast-demo.mp4" muted loop playsinline preload="metadata"></video>
             <div class="play-layer"><div class="play-ring"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M4 2L11 6.5L4 11V2Z" fill="#F7F3EC"/></svg></div></div>
-          </div>
-            <div class="ai-pill">Higgsfield</div><div class="status-pill st-wip">In production</div><div class="dur-badge">0:15</div>
+            <div class="ai-pill">Marketing Studio</div>
+            <div class="status-pill st-live">Live</div>
+            <div class="dur-badge">0:15</div>
           </div>
           <div class="vinfo">
-            <div class="vtitle">Dramatic Scene — Film Noir</div>
-            <div class="vmeta"><span>Short scene</span><span class="vdot"></span><span>SoulID</span><span class="vdot"></span><span>16:9</span></div>
+            <div class="vtitle">Podcast Demo — AI Video</div>
+            <div class="vmeta"><span>Podcast</span><span class="vdot"></span><span>Marketing Studio</span><span class="vdot"></span><span>16:9</span></div>
+            <div class="vtags"><span class="vtag">Conversation</span><span class="vtag">AI Video</span><span class="vtag">Storytelling</span></div>
           </div>
         </div>
         <div class="vcard" onclick="openModal('story3')">
@@ -1341,7 +1347,7 @@ const MD = {
   ugc2: { t:'Three Looks, One Creator', d:'AI influencer try-on featuring three dresses from a recognised fashion brand. Character consistency maintained across all looks with Higgsfield SoulID. Shot in 9:16 for Reels and TikTok.', videoUrl:'https://raw.githubusercontent.com/olijar2701/ai-video-portfolio/main/videos/fashion-tryon.mov', vertical:true },
   ugc3: { t:'Sauna AI — App Review', d:'AI influencer UGC review of Sauna AI. Authentic creator format, 9:16 vertical. Showcasing the tool through a genuine first-person perspective.', videoUrl:'https://raw.githubusercontent.com/olijar2701/ai-video-portfolio/main/videos/sauna-review.mov', vertical:true },
   story1: { t:'Chrome & Sand — Original Short Film', d:'An original cinematic AI short. Two characters in a sci-fi environment — chrome architecture, vast desert, dramatic low-key lighting. Full SoulID production pipeline.' },
-  story2: { t:'Dramatic Scene — Film Noir', d:'Two characters in high tension. A look, a pause, a turn. No dialogue needed. Film noir lighting and composition through AI-generated cinematography.' },
+  story2: { t:'Podcast Demo — AI Video', d:'AI-generated podcast conversation clip showing two-person dialogue, active listening, and short-form storytelling. Created as a portfolio demo for podcast generation.', videoUrl:'https://raw.githubusercontent.com/olijar2701/ai-video-portfolio/main/videos/podcast-demo.mp4' },
   story3: { t:'Desert Landscape — World-Build', d:'Sweeping aerial environment shot. Epic golden-hour desert landscape with dramatic camera movement. World-building through AI-generated visual environments.' },
   motion1: { t:'Chrome Liquid — Morphing', d:'Abstract chrome liquid morphing through impossible shapes in ultra slow-motion. Physical simulation via Higgsfield Soul Engine.', videoUrl:'https://raw.githubusercontent.com/olijar2701/ai-video-portfolio/main/videos/chrome-liquid.mp4' },
   motion2: { t:'Digital Glitch — Neon Distort', d:'Pixel glitch effects with neon color distortion. Digital art aesthetic. Works as transition element, social teaser, or standalone visual loop for music or tech brands.' },
