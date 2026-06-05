@@ -902,13 +902,13 @@ footer {
 <div id="reel-wrap" class="reveal up" style="max-width:1200px;margin:0 auto;padding:80px 48px 0;">
   <div class="section-eyebrow reveal left">2026 Showreel</div>
   <div class="reel-card reveal scale" style="margin-top:20px;" onclick="openModal('showreel')">
-    <div class="reel-inner">
-      <div class="reel-blob-1"></div>
-      <div class="reel-blob-2"></div>
+    <div class="reel-inner" style="position:relative;">
+      <video class="thumb-video" src="https://raw.githubusercontent.com/olijar2701/ai-video-portfolio/main/videos/showreel.mp4" muted loop playsinline preload="metadata" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.62;filter:saturate(.9) contrast(.92);"></video>
+      <div style="position:absolute;inset:0;background:linear-gradient(135deg, rgba(7,25,54,.78), rgba(7,25,54,.25) 48%, rgba(7,25,54,.82));"></div>
       <div class="reel-content">
         <div class="reel-eyebrow">AI Video Portfolio — 2026</div>
         <div class="reel-title">Full Showreel</div>
-        <div class="reel-sub">Higgsfield · Soul Engine · SoulID · Kling · Runway</div>
+        <div class="reel-sub">Brand films · product ads · UGC · storytelling · VFX</div>
         <div class="reel-play">
           <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
             <path d="M8 5L17 11L8 17V5Z" fill="#F7F3EC"/>
@@ -1336,7 +1336,7 @@ function tab(id) {
 
 // ── MODAL ──────────────────────────────────────────────────
 const MD = {
-  showreel: { t:'2026 AI Video Showreel', d:'Polished 28-second portfolio montage with category title cards, branded navy/ivory transitions, and generated ambient music bed.', videoUrl:'https://raw.githubusercontent.com/olijar2701/ai-video-portfolio/main/videos/showreel.mp4' },
+  showreel: { t:'2026 AI Video Showreel', d:'Full portfolio showreel featuring selected AI video work across brand films, product ads, UGC, storytelling, and motion experiments.', videoUrl:'https://raw.githubusercontent.com/olijar2701/ai-video-portfolio/main/videos/showreel.mp4' },
   brand1: { t:'Hoka — Runner in Motion', d:'Cinematic brand film featuring a runner and the Hoka shoe in motion. Documentary-style handheld cinematography, slow-motion sole impact, authentic athletic energy.', videoUrl:'https://raw.githubusercontent.com/olijar2701/ai-video-portfolio/main/videos/hoka.mov' },
   brand2: { t:'Fashion Film — Warsaw Streets', d:'SoulID-locked character walking through cobblestone streets. Trench coat, autumn palette, cinematic dolly push. Demonstrates character consistency across multiple shots.' },
   brand3: { t:'Skincare Product — Micro Glow', d:'Ultra close-up skin visualization with diffused light. Serum dissolving into a radiant glow. Minimalist white studio aesthetic for high-end beauty brands.' },
