@@ -1360,7 +1360,7 @@ function openModal(id) {
   document.getElementById('m-desc').textContent = d.d;
   const area = document.getElementById('modal-vid-inner');
   if (d.videoUrl) {
-    area.innerHTML = '<video src="' + d.videoUrl + '" controls autoplay muted playsinline style="width:100%;height:100%;object-fit:cover;background:#000"></video>';
+    area.innerHTML = '<video src="' + d.videoUrl + '"' + (d.posterUrl ? ' poster="' + d.posterUrl + '"' : '') + ' controls autoplay muted playsinline style="width:100%;height:100%;object-fit:cover;background:#000"></video>';
   } else {
     area.innerHTML = '<span style="font-family:var(--serif);font-style:italic;color:rgba(28,43,69,0.35);font-size:17px">Video in production — check back soon</span>';
   }
